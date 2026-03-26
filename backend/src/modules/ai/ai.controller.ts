@@ -8,7 +8,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import type { Response } from 'express';
+import { Response } from 'express';
 import { IsString, MinLength } from 'class-validator';
 import { AiService } from './ai.service';
 
@@ -46,7 +46,7 @@ export class AiController {
   @HttpCode(HttpStatus.OK)
   async chatStream(
     @Body() dto: ChatMessageDto,
-    @Res() res: Response,
+    @Res() res: any,
   ): Promise<void> {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');

@@ -1,0 +1,109 @@
+@baseUrl = https://uppersilver-backend-1072260475637.us-central1.run.app
+
+### ==========================================
+### DEMO DE CONSUMO DE ENDPOINTS - UPPERSILVER
+### ==========================================
+
+# 1. MÓDULO DE PRODUCTOS (Products)
+# ==========================================
+
+### 1A. ÉXITO (HTTP 200): Obtener todos los productos reales de la BD
+GET {{baseUrl}}/products
+Accept: application/json
+
+### 1B. ÉXITO (HTTP 200/201): Crear un producto nuevo
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "name": "Camiseta Básica Hombre",
+  "description": "Camiseta 100% algodón color negro",
+  "price": 45000,
+  "stock": 100,
+  "category": "Hombres"
+}
+
+### 1C. ERROR CONTROLADO (HTTP 400 Bad Request): Fallo de validación (Falta precio, stock)
+# Validando que class-validator funcione como exige la arquitectura
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "name": "Camiseta Incompleta",
+  "description": "Camiseta sin precio ni medidas"
+}
+
+
+# 2. MÓDULO DE INTELIGENCIA ARTIFICIAL (AI)
+# ==========================================
+
+### 2A. ÉXITO (HTTP 200): Chat con el asistente de IA 
+POST {{baseUrl}}/ai/chat
+Content-Type: application/json
+
+{
+  "message": "¿Tienen chaquetas de cuero para mujer?"
+}
+
+### 2B. ERROR CONTROLADO (HTTP 400): Mensaje vacío (rechazado por MinLength)
+POST {{baseUrl}}/ai/chat
+Content-Type: application/json
+
+{
+  "message": ""
+}
+
+
+# 3. MÓDULO DE PAGOS (Payments)
+# ==========================================
+
+### 3A. ÉXITO (HTTP 201): Crear Preferencia Mercado Pago
+POST {{baseUrl}}/payments/mercadopago/preference
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "title": "Zapatos Formales",
+      "quantity": 1,
+      "unit_price": 120000
+    }
+  ],
+  "payerEmail": "cliente@ejemplo.com"
+}
+
+### 3B. ERROR CONTROLADO (HTTP 400): Crear transacción Wompi sin datos de tarjeta completos o firma inválida
+POST {{baseUrl}}/payments/wompi/create
+Content-Type: application/json
+
+{
+  "amountInCents": 15000000,
+  "customerEmail": "test@test.com"
+  // Faltaría el token de tarjeta, método de pago u otra info requerida, 
+  // lo que desencadena un error 400 del validador de DTO.
+}
+
+
+# 4. MÓDULO DE NOTIFICACIONES
+# ==========================================
+
+### 4A. ÉXITO (HTTP 201): Enviar notificación de pedido por Whatsapp o Correo
+POST {{baseUrl}}/notifications/send
+Content-Type: application/json
+
+{
+  "type": "EMAIL",
+  "to": "mateo@test.com",
+  "subject": "Tu pedido #123 ha sido confirmado",
+  "message": "Hola, gracias por comprar en UpperSilver. Tu pedido va en camino."
+}
+
+### 4B. ERROR CONTROLADO (HTTP 400): Tipo de notificación inválido
+POST {{baseUrl}}/notifications/send
+Content-Type: application/json
+
+{
+  "type": "PALOMA_MENSAJERA", 
+  "to": "test@test.com",
+  "message": "Esto fallará"
+}
