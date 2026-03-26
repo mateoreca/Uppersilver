@@ -1,0 +1,64 @@
+
+### UpperSilver API Collection
+# Este archivo puede ser usado con la extensión "REST Client" de VS Code.
+# También puedes importar este formato o el JSON en Postman y Bruno.
+
+@baseUrl = http://localhost:3000
+@token = pon_aqui_tu_token_jwt
+
+### ========================================
+### AUTHENTICATION & USERS
+### ========================================
+
+### 1. Registrar un nuevo usuario
+POST {{baseUrl}}/users
+Content-Type: application/json
+
+{
+  "firstName": "Juan",
+  "lastName": "Perez",
+  "email": "juan.perez@example.com",
+  "password": "securepassword123"
+}
+
+###
+
+### 2. Iniciar sesión (Obtener JWT)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "juan.perez@example.com",
+  "password": "securepassword123"
+}
+
+### ========================================
+### PRODUCTS
+### ========================================
+
+### 3. Crear un nuevo producto
+POST {{baseUrl}}/products
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Collar de Plata Clásico",
+  "description": "Hermoso collar de plata 925 con diseño minimalista.",
+  "price": 120.50,
+  "stock": 15,
+  "category": "Collares",
+  "imageUrl": "https://example.com/images/collar.jpg"
+}
+
+###
+
+### 4. Obtener todos los productos
+GET {{baseUrl}}/products
+
+###
+
+### 5. Obtener un producto por ID
+# Cambia el '1' por el ID (UUID o string) de tu producto.
+GET {{baseUrl}}/products/1
+
+###

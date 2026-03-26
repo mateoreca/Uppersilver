@@ -36,7 +36,7 @@ import { GcpModule } from './modules/gcp/gcp.module';
           password: process.env.DB_PASSWORD,
           database: process.env.DB_DATABASE,
           autoLoadEntities: true,
-          synchronize: false,
+          synchronize: true,
           extra: isCloudRun ? { stream } : undefined,
         };
       },

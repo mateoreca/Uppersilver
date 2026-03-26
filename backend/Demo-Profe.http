@@ -1,0 +1,93 @@
+### DEMOSTRACIÓN PARA EL PROFESOR (E-commerce UpperSilver)
+# Sigue estos pasos en orden frente al profesor para sacar un 10.
+
+@baseUrl = http://localhost:3000
+@tokenProfe = pega_aqui_tu_token_despues_del_login
+
+### ==============================================================
+### PASO 0: CREAR TU USUARIO (Para darnos permisos)
+### Muéstrale al profe que la base de datos registra usuarios
+### ==============================================================
+POST {{baseUrl}}/users
+Content-Type: application/json
+
+{
+  "firstName": "Admin",
+  "lastName": "Profe",
+  "email": "admin@profe.com",
+  "password": "clave_secreta_profe"
+}
+
+###
+
+### ==============================================================
+### PASO 1: DEMOSTRAR SEGURIDAD (¡Intento de hackeo!)
+### Explícale al profe que tus rutas de creación están protegidas.
+### Si alguien intenta crear un producto sin iniciar sesión:
+### Debería devolver un error 401 Unauthorized en rojo.
+### ==============================================================
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "name": "Anillo de Oro Falso",
+  "description": "El intruso intenta meter un producto falso.",
+  "price": 0,
+  "stock": 100
+}
+
+### ==============================================================
+### PASO 2: INICIAR SESIÓN (Obtener el "pasaporte" JWT)
+### Explícale que ahora sí, como administrador válido, vas a loarte.
+### Copia el Token que te devuelva esta petición y pégalo arriba en @tokenProfe.
+### ==============================================================
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@profe.com",
+  "password": "clave_secreta_profe"
+}
+
+### ==============================================================
+### PASO 3: CREAR VARIOS PRODUCTOS CON EL TOKEN
+### Explícale que gracias al JWT, ahora sí tienes permisos (201 Created).
+### ==============================================================
+
+# Producto A
+POST {{baseUrl}}/products
+Content-Type: application/json
+Authorization: Bearer {{tokenProfe}}
+
+{
+  "name": "Anillo de Plata 925 con Zafiro",
+  "description": "Un anillo elegante con piedra preciosa incrustada.",
+  "price": 250.00,
+  "stock": 5,
+  "category": "Anillos",
+  "imageUrl": "https://example.com/images/anillo_zafiro.jpg"
+}
+
+###
+
+# Producto B
+POST {{baseUrl}}/products
+Content-Type: application/json
+Authorization: Bearer {{tokenProfe}}
+
+{
+  "name": "Pulsera Trenzada Fina",
+  "description": "Pulsera de plata pura ideal para regalos.",
+  "price": 85.00,
+  "stock": 20,
+  "category": "Pulseras"
+}
+
+### ==============================================================
+### PASO 4: MOSTRAR EL CATÁLOGO (Base de datos funcionando)
+### Dile al profe: "Y aquí está la prueba de que todo se guardó..."
+### Debería devolverte un arreglo [...] con TODOS tus productos.
+### ==============================================================
+GET {{baseUrl}}/products
+
+###
