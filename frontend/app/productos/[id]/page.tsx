@@ -204,20 +204,21 @@ export default function ProductPage({ params }: ProductPageProps) {
                 )}
               </div>
               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                {COLORS.map((color) => {
-                  const isSelected = selectedColor === color.name;
+                {(product.colors || COLORS.map(c => c.name)).map((colorName) => {
+                  const colorObj = COLORS.find(c => c.name.toLowerCase() === colorName.toLowerCase()) || { name: colorName, hex: '#ccc' };
+                  const isSelected = selectedColor === colorObj.name;
                   return (
                     <button
-                      key={color.name}
-                      id={`color-${color.name.toLowerCase().replace(/\s+/g, '-')}`}
-                      onClick={() => setSelectedColor(color.name)}
+                      key={colorObj.name}
+                      id={`color-${colorObj.name.toLowerCase().replace(/\s+/g, '-')}`}
+                      onClick={() => setSelectedColor(colorObj.name)}
                       aria-pressed={isSelected}
-                      title={color.name}
+                      title={colorObj.name}
                       style={{
                         width: '36px',
                         height: '36px',
                         borderRadius: '50%',
-                        background: color.hex,
+                        background: colorObj.hex,
                         border: isSelected
                           ? '3px solid var(--accent-gold)'
                           : '2px solid var(--border-subtle)',
@@ -243,7 +244,7 @@ export default function ProductPage({ params }: ProductPageProps) {
                 )}
               </div>
               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                {SIZES.map((size) => {
+                {(product.sizes || SIZES).map((size) => {
                   const isSelected = selectedSize === size;
                   return (
                     <button

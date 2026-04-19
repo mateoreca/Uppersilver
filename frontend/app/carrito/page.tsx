@@ -140,23 +140,22 @@ export default function CartPage() {
               id="cart-clear-btn"
               onClick={clearCart}
               style={{
-                background: 'none',
-                border: '1px solid rgba(239,68,68,0.3)',
+                background: '#ef4444',
+                border: 'none',
                 borderRadius: '8px',
-                color: 'rgba(239,68,68,0.7)',
+                color: '#ffffff',
                 fontSize: '13px',
                 padding: '8px 16px',
                 cursor: 'pointer',
-                fontWeight: 500,
+                fontWeight: 600,
                 transition: 'all 150ms',
+                boxShadow: '0 4px 12px rgba(239, 68, 68, 0.2)',
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background = 'rgba(239,68,68,0.08)';
-                (e.currentTarget as HTMLButtonElement).style.color = '#ef4444';
+                (e.currentTarget as HTMLButtonElement).style.background = '#dc2626';
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background = 'none';
-                (e.currentTarget as HTMLButtonElement).style.color = 'rgba(239,68,68,0.7)';
+                (e.currentTarget as HTMLButtonElement).style.background = '#ef4444';
               }}
             >
               Vaciar carrito

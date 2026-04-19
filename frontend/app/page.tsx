@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { getProducts } from '@/lib/api';
 import ProductCard from '@/components/ProductCard';
-import { MEN_CATEGORIES, WOMEN_CATEGORIES } from '@/types';
+import { MEN_CATEGORIES, WOMEN_CATEGORIES, Product } from '@/types';
 
 export default async function HomePage() {
   let products: Product[] = [];
@@ -81,7 +81,7 @@ export default async function HomePage() {
 
         <div
           className="container-us animate-fade-up"
-          style={{ textAlign: 'center', position: 'relative', zIndex: 1, padding: '80px 24px' }}
+          style={{ textAlign: 'center', position: 'relative', zIndex: 1, padding: '80px 24px 140px' }}
         >
           {/* Eyebrow */}
           <div

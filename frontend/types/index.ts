@@ -9,6 +9,8 @@ export interface Product {
   stock: number;
   category: string | null;
   imageUrl: string | null;
+  sizes?: string[];
+  colors?: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -66,6 +68,13 @@ export const COLORS: ColorOption[] = [
   { name: 'Borgoña', hex: '#800020' },
   { name: 'Camel', hex: '#C19A6B' },
   { name: 'Verde oliva', hex: '#556B2F' },
+  { name: 'Azul Claro', hex: '#D2E1EF' },
+  { name: 'Rosa', hex: '#EED4D8' },
+  { name: 'Khaki', hex: '#C3B091' },
+  { name: 'Gris Oscuro', hex: '#404040' },
+  { name: 'Marrón Oscuro', hex: '#5C4033' },
+  { name: 'Floral Rosa', hex: '#F4C2C2' },
+  { name: 'Blanco Roto', hex: '#F9F6EE' },
 ];
 
 /** Estado del carrito */
