@@ -8,6 +8,10 @@ import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ProductsModule } from './modules/products/products.module';
 import { GcpModule } from './modules/gcp/gcp.module';
+import { AiModule } from './modules/ai/ai.module';
+import { PaymentsModule } from './modules/payments/payments.module';
+import { ShippingModule } from './modules/shipping/shipping.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -18,7 +22,7 @@ import { GcpModule } from './modules/gcp/gcp.module';
       useFactory: async () => {
         const isCloudRun = !!process.env.INSTANCE_CONNECTION_NAME;
         let stream;
-        
+
         if (isCloudRun && process.env.INSTANCE_CONNECTION_NAME) {
           const connector = new Connector();
           const clientOpts = await connector.getOptions({
@@ -28,15 +32,12 @@ import { GcpModule } from './modules/gcp/gcp.module';
           stream = clientOpts.stream;
         }
 
+        // OPCIÓN A: Base de datos en memoria (SQLite) para lograr el despliegue sin credenciales
         return {
-          type: 'postgres',
-          host: isCloudRun ? undefined : process.env.DB_HOST,
-          port: isCloudRun ? undefined : parseInt(process.env.DB_PORT || '5432', 10),
-          username: process.env.DB_USERNAME,
-          password: process.env.DB_PASSWORD,
-          database: process.env.DB_DATABASE,
+          type: 'sqlite',
+          database: ':memory:',
           autoLoadEntities: true,
-          synchronize: true,
+          synchronize: false,
           extra: isCloudRun ? { stream } : undefined,
         };
       },
@@ -45,8 +46,13 @@ import { GcpModule } from './modules/gcp/gcp.module';
     AuthModule,
     ProductsModule,
     GcpModule,
+    AiModule,
+    PaymentsModule,
+    ShippingModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }
+

@@ -1,0 +1,297 @@
+{
+  "info": {
+    "name": "UpperSilver Todos los Servicios (Cloud Run)",
+    "description": "Demostración completa de TODOS los servicios del backend (Productos, IA, Pagos, Notificaciones) validando escenarios de éxito (HTTP 200/201) y error (HTTP 400/500).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. PRODUCTOS",
+      "item": [
+        {
+          "name": "1A. Crear Producto - ÉXITO (HTTP 201)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Chaqueta de Cuero\",\n  \"description\": \"Chaqueta negra estilo motociclista 100% cuero\",\n  \"price\": 250000,\n  \"stock\": 15,\n  \"category\": \"Hombres\"\n}"
+            },
+            "url": {
+              "raw": "https://uppersilver-backend-1072260475637.us-central1.run.app/products",
+              "protocol": "https",
+              "host": [
+                "uppersilver-backend-1072260475637",
+                "us-central1",
+                "run",
+                "app"
+              ],
+              "path": [
+                "products"
+              ]
+            }
+          }
+        },
+        {
+          "name": "1B. Listar Productos BD - ÉXITO (HTTP 200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://uppersilver-backend-1072260475637.us-central1.run.app/products",
+              "protocol": "https",
+              "host": [
+                "uppersilver-backend-1072260475637",
+                "us-central1",
+                "run",
+                "app"
+              ],
+              "path": [
+                "products"
+              ]
+            }
+          }
+        },
+        {
+          "name": "1C. Crear Producto - ERROR CONTROLADO (HTTP 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Camiseta Incompleta\",\n  \"description\": \"Sin el precio ni categoría obligatorios\"\n}"
+            },
+            "url": {
+              "raw": "https://uppersilver-backend-1072260475637.us-central1.run.app/products",
+              "protocol": "https",
+              "host": [
+                "uppersilver-backend-1072260475637",
+                "us-central1",
+                "run",
+                "app"
+              ],
+              "path": [
+                "products"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. INTELIGENCIA ARTIFICIAL",
+      "item": [
+        {
+          "name": "2A. Respuesta RAG Vía Chat - EXPECTATIVA DENEGADA SIN API (HTTP 500)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"¿Tienen chaquetas de cuero para mujer?\"\n}"
+            },
+            "url": {
+              "raw": "https://uppersilver-backend-1072260475637.us-central1.run.app/ai/chat",
+              "protocol": "https",
+              "host": [
+                "uppersilver-backend-1072260475637",
+                "us-central1",
+                "run",
+                "app"
+              ],
+              "path": [
+                "ai",
+                "chat"
+              ]
+            }
+          }
+        },
+        {
+          "name": "2B. Petición Malformada de Chat - ERROR (HTTP 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"\"\n}"
+            },
+            "url": {
+              "raw": "https://uppersilver-backend-1072260475637.us-central1.run.app/ai/chat",
+              "protocol": "https",
+              "host": [
+                "uppersilver-backend-1072260475637",
+                "us-central1",
+                "run",
+                "app"
+              ],
+              "path": [
+                "ai",
+                "chat"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. PASARELAS DE PAGO",
+      "item": [
+        {
+          "name": "3A. Crear Preferencia Mercado Pago - EXPECTATIVA DENEGADA (HTTP 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    {\n      \"title\": \"Zapatos Formales\",\n      \"quantity\": 1,\n      \"unit_price\": 120000\n    }\n  ],\n  \"payerEmail\": \"cliente@ejemplo.com\"\n}"
+            },
+            "url": {
+              "raw": "https://uppersilver-backend-1072260475637.us-central1.run.app/payments/mercadopago/preference",
+              "protocol": "https",
+              "host": [
+                "uppersilver-backend-1072260475637",
+                "us-central1",
+                "run",
+                "app"
+              ],
+              "path": [
+                "payments",
+                "mercadopago",
+                "preference"
+              ]
+            }
+          }
+        },
+        {
+          "name": "3B. Crear Transacción Wompi - ERROR (HTTP 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amountInCents\": 15000000,\n  \"customerEmail\": \"test@test.com\"\n}"
+            },
+            "url": {
+              "raw": "https://uppersilver-backend-1072260475637.us-central1.run.app/payments/wompi/create",
+              "protocol": "https",
+              "host": [
+                "uppersilver-backend-1072260475637",
+                "us-central1",
+                "run",
+                "app"
+              ],
+              "path": [
+                "payments",
+                "wompi",
+                "create"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. NOTIFICACIONES",
+      "item": [
+        {
+          "name": "4A. Notificar Estado de Pedido - ÉXITO (HTTP 200)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerName\": \"Mateo\",\n  \"customerPhone\": \"+573000000000\",\n  \"customerEmail\": \"mateo@test.com\",\n  \"orderId\": \"123\",\n  \"status\": \"CONFIRMED\"\n}"
+            },
+            "url": {
+              "raw": "https://uppersilver-backend-1072260475637.us-central1.run.app/notifications/order-status",
+              "protocol": "https",
+              "host": [
+                "uppersilver-backend-1072260475637",
+                "us-central1",
+                "run",
+                "app"
+              ],
+              "path": [
+                "notifications",
+                "order-status"
+              ]
+            }
+          }
+        },
+        {
+          "name": "4B. Notificar Estado de Pedido - ERROR (HTTP 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerName\": \"Mateo\"\n}"
+            },
+            "url": {
+              "raw": "https://uppersilver-backend-1072260475637.us-central1.run.app/notifications/order-status",
+              "protocol": "https",
+              "host": [
+                "uppersilver-backend-1072260475637",
+                "us-central1",
+                "run",
+                "app"
+              ],
+              "path": [
+                "notifications",
+                "order-status"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
