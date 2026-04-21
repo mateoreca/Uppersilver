@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import { Product } from '@/types';
 import { formatPrice } from '@/lib/api';

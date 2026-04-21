@@ -1,6 +1,44 @@
 import { Product } from '@/types';
 
-/** Productos de demostración para mostrar la UI cuando el backend no está disponible */
+/** 
+ * ============================================================================
+ * INSTRUCCIONES PARA EL EQUIPO (SUBIDA DE IMÁGENES):
+ * ============================================================================
+ * 
+ * Para que las imágenes de los productos se muestren correctamente, deben 
+ * guardar las fotos en la siguiente carpeta del proyecto:
+ * 
+ *    frontend/public/img/products/
+ * 
+ * (Si las carpetas 'img' y 'products' no existen dentro de 'public', por favor créenlas).
+ * 
+ * Cada imagen debe tener EXACTAMENTE el mismo nombre que el 'id' del producto, 
+ * con la extensión '.jpg'. 
+ * 
+ * Lista de nombres de archivo requeridos para Hombre:
+ * - mock-h1.jpg (Camisa Oxford Premium)
+ * - mock-h2.jpg (Camisa Lino Mediterráneo)
+ * - mock-h3.jpg (Pantalón Chino Clásico)
+ * - mock-h4.jpg (Pantalón Jogging Luxury)
+ * - mock-h5.jpg (Chaqueta Bomber Italiana)
+ * - mock-h6.jpg (Blazer Estructurado)
+ * - mock-h7.jpg (Set Interior Modal)
+ * - mock-h8.jpg (Cinturón Cuero Artesanal)
+ * 
+ * Lista de nombres de archivo requeridos para Mujer:
+ * - mock-m1.jpg (Vestido Midi Satén)
+ * - mock-m2.jpg (Vestido Wrap Floral)
+ * - mock-m3.jpg (Blusa Francesa Bordada)
+ * - mock-m4.jpg (Top Seda Natural)
+ * - mock-m5.jpg (Pantalón Wide Leg)
+ * - mock-m6.jpg (Chaqueta Tweed Premium)
+ * - mock-m7.jpg (Blazer Oversize Cream)
+ * - mock-m8.jpg (Collar Perlas Cultivadas)
+ * 
+ * Una vez guarden las imágenes ahí, el frontend las cargará automáticamente.
+ * ============================================================================
+ */
+
 export const MOCK_MEN_PRODUCTS: Product[] = [
   {
     id: 'mock-h1',
@@ -11,7 +49,7 @@ export const MOCK_MEN_PRODUCTS: Product[] = [
     category: 'Camisas',
     sizes: ['S', 'M', 'L', 'XL'],
     colors: ['Blanco', 'Azul Claro', 'Rosa'],
-    imageUrl: null,
+    imageUrl: '/img/products/mock-h1.jpg',
     createdAt: '',
     updatedAt: '',
   },
@@ -24,7 +62,7 @@ export const MOCK_MEN_PRODUCTS: Product[] = [
     category: 'Camisas',
     sizes: ['S', 'M', 'L', 'XL'],
     colors: ['Blanco', 'Azul Claro', 'Rosa'],
-    imageUrl: null,
+    imageUrl: '/img/products/mock-h2.jpg',
     createdAt: '',
     updatedAt: '',
   },
@@ -37,7 +75,7 @@ export const MOCK_MEN_PRODUCTS: Product[] = [
     category: 'Pantalones',
     sizes: ['30', '32', '34', '36'],
     colors: ['Khaki', 'Azul Marino', 'Negro'],
-    imageUrl: null,
+    imageUrl: '/img/products/mock-h3.jpg',
     createdAt: '',
     updatedAt: '',
   },
@@ -50,7 +88,7 @@ export const MOCK_MEN_PRODUCTS: Product[] = [
     category: 'Pantalones',
     sizes: ['30', '32', '34', '36'],
     colors: ['Khaki', 'Azul Marino', 'Negro'],
-    imageUrl: null,
+    imageUrl: '/img/products/mock-h4.jpg',
     createdAt: '',
     updatedAt: '',
   },
@@ -63,7 +101,7 @@ export const MOCK_MEN_PRODUCTS: Product[] = [
     category: 'Chaquetas',
     sizes: ['M', 'L'],
     colors: ['Verde Oliva', 'Negro'],
-    imageUrl: null,
+    imageUrl: '/img/products/mock-h5.jpg',
     createdAt: '',
     updatedAt: '',
   },
@@ -76,7 +114,7 @@ export const MOCK_MEN_PRODUCTS: Product[] = [
     category: 'Chaquetas',
     sizes: ['M', 'L'],
     colors: ['Verde Oliva', 'Negro'],
-    imageUrl: null,
+    imageUrl: '/img/products/mock-h6.jpg',
     createdAt: '',
     updatedAt: '',
   },
@@ -89,7 +127,7 @@ export const MOCK_MEN_PRODUCTS: Product[] = [
     category: 'Ropa Interior',
     sizes: ['S', 'M', 'L', 'XL'],
     colors: ['Negro', 'Gris Oscuro', 'Blanco'],
-    imageUrl: null,
+    imageUrl: '/img/products/mock-h7.jpg',
     createdAt: '',
     updatedAt: '',
   },
@@ -102,7 +140,7 @@ export const MOCK_MEN_PRODUCTS: Product[] = [
     category: 'Accesorios',
     sizes: ['S/M', 'L/XL'],
     colors: ['Marrón Oscuro', 'Negro'],
-    imageUrl: null,
+    imageUrl: '/img/products/mock-h8.jpg',
     createdAt: '',
     updatedAt: '',
   },
@@ -118,7 +156,7 @@ export const MOCK_WOMEN_PRODUCTS: Product[] = [
     category: 'Vestidos',
     sizes: ['XS', 'S', 'M', 'L'],
     colors: ['Floral Rosa', 'Negro'],
-    imageUrl: null,
+    imageUrl: '/img/products/mock-m1.jpg',
     createdAt: '',
     updatedAt: '',
   },
@@ -131,7 +169,7 @@ export const MOCK_WOMEN_PRODUCTS: Product[] = [
     category: 'Vestidos',
     sizes: ['XS', 'S', 'M', 'L'],
     colors: ['Floral Rosa', 'Negro'],
-    imageUrl: null,
+    imageUrl: '/img/products/mock-m2.jpg',
     createdAt: '',
     updatedAt: '',
   },
@@ -144,7 +182,7 @@ export const MOCK_WOMEN_PRODUCTS: Product[] = [
     category: 'Blusas',
     sizes: ['S', 'M', 'L'],
     colors: ['Blanco Roto', 'Rosa'],
-    imageUrl: null,
+    imageUrl: '/img/products/mock-m3.jpg',
     createdAt: '',
     updatedAt: '',
   },
@@ -157,7 +195,7 @@ export const MOCK_WOMEN_PRODUCTS: Product[] = [
     category: 'Blusas',
     sizes: ['S', 'M', 'L'],
     colors: ['Blanco Roto', 'Rosa'],
-    imageUrl: null,
+    imageUrl: '/img/products/mock-m4.jpg',
     createdAt: '',
     updatedAt: '',
   },
@@ -170,7 +208,7 @@ export const MOCK_WOMEN_PRODUCTS: Product[] = [
     category: 'Pantalones',
     sizes: ['30', '32', '34', '36'],
     colors: ['Khaki', 'Azul Marino', 'Negro'],
-    imageUrl: null,
+    imageUrl: '/img/products/mock-m5.jpg',
     createdAt: '',
     updatedAt: '',
   },
@@ -183,7 +221,7 @@ export const MOCK_WOMEN_PRODUCTS: Product[] = [
     category: 'Chaquetas',
     sizes: ['M', 'L'],
     colors: ['Verde Oliva', 'Negro'],
-    imageUrl: null,
+    imageUrl: '/img/products/mock-m6.jpg',
     createdAt: '',
     updatedAt: '',
   },
@@ -196,7 +234,7 @@ export const MOCK_WOMEN_PRODUCTS: Product[] = [
     category: 'Chaquetas',
     sizes: ['M', 'L'],
     colors: ['Verde Oliva', 'Negro'],
-    imageUrl: null,
+    imageUrl: '/img/products/mock-m7.jpg',
     createdAt: '',
     updatedAt: '',
   },
@@ -209,7 +247,7 @@ export const MOCK_WOMEN_PRODUCTS: Product[] = [
     category: 'Accesorios',
     sizes: ['S/M', 'L/XL'],
     colors: ['Marrón Oscuro', 'Negro'],
-    imageUrl: null,
+    imageUrl: '/img/products/mock-m8.jpg',
     createdAt: '',
     updatedAt: '',
   },
