@@ -11,6 +11,7 @@ export interface Product {
   imageUrl: string | null;
   sizes?: string[];
   colors?: string[];
+  gender?: 'hombre' | 'mujer';
   createdAt: string;
   updatedAt: string;
 }

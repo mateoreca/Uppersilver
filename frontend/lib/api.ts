@@ -55,6 +55,14 @@ export function filterByGender(products: Product[], gender: 'hombre' | 'mujer'):
   const womenKeywords = ['vestido', 'blusa', 'falda', 'top', 'ropa interior mujer'];
 
   return products.filter((p) => {
+    // 1. Usar el campo gender si viene desde el backend o mock
+    if (p.gender) return p.gender === gender;
+
+    // 2. Fallback para mock data basado en el ID
+    if (p.id.startsWith('mock-h')) return gender === 'hombre';
+    if (p.id.startsWith('mock-m')) return gender === 'mujer';
+
+    // 3. Heurística original basada en categoría (para datos sin gender ni ID mock)
     if (!p.category) return true;
     const cat = p.category.toLowerCase();
     if (gender === 'hombre') {

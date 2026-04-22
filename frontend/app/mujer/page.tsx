@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Product, WOMEN_CATEGORIES } from '@/types';
-import { getProducts } from '@/lib/api';
+import { getProducts, filterByGender } from '@/lib/api';
 import ProductCard from '@/components/ProductCard';
 import CategoryFilter from '@/components/CategoryFilter';
 
@@ -28,13 +28,7 @@ export default function MujerPage({
     setLoading(true);
     getProducts()
       .then((all) => {
-        // Filtrar: excluir categorías exclusivas de hombre
-        const menOnly = ['camisa', 'corbata', 'traje'];
-        const women = all.filter((p) => {
-          const cat = (p.category ?? '').toLowerCase();
-          return !menOnly.some((m) => cat === m); // coincidencia exacta o incluye
-        });
-        setProducts(women);
+        setProducts(filterByGender(all, 'mujer'));
       })
       .catch(() => setError(true))
       .finally(() => setLoading(false));
