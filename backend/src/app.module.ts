@@ -37,7 +37,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
           type: 'sqlite',
           database: ':memory:',
           autoLoadEntities: true,
-          synchronize: false,
+          synchronize: true,
           extra: isCloudRun ? { stream } : undefined,
         };
       },

@@ -1,7 +1,7 @@
 import { Product } from '@/types';
 import { ALL_MOCK_PRODUCTS } from './mockData';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080';
 
 /** Obtiene todos los productos del backend */
 export async function getProducts(): Promise<Product[]> {
