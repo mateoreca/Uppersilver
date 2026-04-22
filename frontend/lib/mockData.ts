@@ -12,6 +12,8 @@ import { Product } from '@/types';
  * 
  * (Si las carpetas 'img' y 'products' no existen dentro de 'public', por favor créenlas).
  * 
+ * YA ESTAN CREADAS LAS CARPETAS S4M0L
+ * 
  * Cada imagen debe tener EXACTAMENTE el mismo nombre que el 'id' del producto, 
  * con la extensión '.jpg'. 
  * 
@@ -113,7 +115,7 @@ export const MOCK_MEN_PRODUCTS: Product[] = [
     stock: 9,
     category: 'Chaquetas',
     sizes: ['M', 'L'],
-    colors: ['Verde Oliva', 'Negro'],
+    colors: ['Cafe', 'Negro'],
     imageUrl: '/img/products/mock-h6.jpg',
     createdAt: '',
     updatedAt: '',
@@ -126,7 +128,7 @@ export const MOCK_MEN_PRODUCTS: Product[] = [
     stock: 20,
     category: 'Ropa Interior',
     sizes: ['S', 'M', 'L', 'XL'],
-    colors: ['Negro', 'Gris Oscuro', 'Blanco'],
+    colors: ['Rojo', 'Gris Oscuro', 'Blanco'],
     imageUrl: '/img/products/mock-h7.jpg',
     createdAt: '',
     updatedAt: '',
