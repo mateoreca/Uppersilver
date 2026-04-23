@@ -1,0 +1,14 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'build',
+      '--build-arg', 'NEXT_PUBLIC_API_URL=$_NEXT_PUBLIC_API_URL',
+      '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/uppersilver-repo/frontend',
+      '.'
+    ]
+
+images:
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/uppersilver-repo/frontend'
+
+substitutions:
+  _NEXT_PUBLIC_API_URL: 'https://uppersilver-backend-1072260475637.us-central1.run.app'

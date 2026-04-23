@@ -21,7 +21,13 @@ export class Product {
   category: string;
 
   @Column({ nullable: true })
+  gender: string;
+
+  @Column({ nullable: true })
   imageUrl: string;
+
+  @Column({ type: 'simple-array', nullable: true })
+  sizes: string[];
 
   @CreateDateColumn()
   createdAt: Date;

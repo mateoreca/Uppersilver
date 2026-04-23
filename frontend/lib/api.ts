@@ -41,6 +41,19 @@ export async function getProductById(id: string): Promise<Product> {
   }
 }
 
+/** Reduce el stock de un producto en el backend */
+export async function reduceStock(productId: string, quantity: number): Promise<void> {
+  try {
+    await fetch(`${API_BASE_URL}/products/${productId}/reduce`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ quantity }),
+    });
+  } catch (error) {
+    console.error(`Error reduciendo stock para ${productId}:`, error);
+  }
+}
+
 /** Filtra productos por categoría (client-side) */
 export function filterByCategory(products: Product[], category: string): Product[] {
   if (!category || category === 'Todos') return products;

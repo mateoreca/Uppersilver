@@ -7,10 +7,8 @@ import {
   CreateMpPreferenceDto,
   MpWebhookDto,
 } from './dto/payments.dto';
+import { OrdersService } from '../orders/orders.service';
 
-// ──────────────────────────────────────────────────────────────────────────────
-// Tipos de respuesta de las APIs externas
-// ──────────────────────────────────────────────────────────────────────────────
 export interface WompiTransactionResponse {
   data: { id: string; status: string; redirect_url?: string };
 }
@@ -28,16 +26,11 @@ export class PaymentsService {
   private readonly wompiBaseUrl = 'https://production.wompi.co/v1';
   private readonly mpBaseUrl = 'https://api.mercadopago.com';
 
-  constructor(private readonly config: ConfigService) {}
+  constructor(
+    private readonly config: ConfigService,
+    private readonly ordersService: OrdersService,
+  ) {}
 
-  // ────────────────────────────────────────────────────────────────────────────
-  // WOMPI
-  // ────────────────────────────────────────────────────────────────────────────
-
-  /**
-   * Crea una transacción en Wompi.
-   * Referencia: https://docs.wompi.co/reference/crear-una-transaccion
-   */
   async createWompiTransaction(dto: CreateWompiTransactionDto): Promise<WompiTransactionResponse> {
     const privateKey = this.config.getOrThrow<string>('WOMPI_PRIVATE_KEY');
 
@@ -66,15 +59,9 @@ export class PaymentsService {
     return response.json() as Promise<WompiTransactionResponse>;
   }
 
-  /**
-   * Valida y procesa un webhook de Wompi.
-   * Verifica la firma HMAC-SHA256 con WOMPI_EVENTS_SECRET.
-   * Referencia: https://docs.wompi.co/docs/colombia/eventos-webhooks
-   */
-  processWompiWebhook(dto: WompiWebhookDto, rawSignature: string): { orderId: string; status: string } {
+  async processWompiWebhook(dto: WompiWebhookDto, rawSignature: string): Promise<{ orderId: string; status: string }> {
     const eventsSecret = this.config.getOrThrow<string>('WOMPI_EVENTS_SECRET');
 
-    // Reconstruir la cadena de firma según la especificación de Wompi
     const properties = (dto.signature as any).properties as string[];
     const checksum = (dto.signature as any).checksum as string;
 
@@ -96,19 +83,13 @@ export class PaymentsService {
     const { reference, status } = dto.data.transaction;
     this.logger.log(`Wompi webhook: order ${reference} → ${status}`);
 
-    // Aquí se puede emitir un evento NestJS o actualizar la DB de órdenes
+    if (status === 'APPROVED') {
+      await this.ordersService.markAsPaid(reference);
+    }
+
     return { orderId: reference, status };
   }
 
-  // ────────────────────────────────────────────────────────────────────────────
-  // MERCADO PAGO
-  // ────────────────────────────────────────────────────────────────────────────
-
-  /**
-   * Crea una preferencia de pago en Mercado Pago.
-   * Retorna el init_point (URL de pago) para redirigir al cliente.
-   * Referencia: https://www.mercadopago.com.co/developers/es/reference/preferences/_checkout_preferences/post
-   */
   async createMpPreference(dto: CreateMpPreferenceDto): Promise<MpPreferenceResponse> {
     const accessToken = this.config.getOrThrow<string>('MP_ACCESS_TOKEN');
 
@@ -145,11 +126,6 @@ export class PaymentsService {
     return response.json() as Promise<MpPreferenceResponse>;
   }
 
-  /**
-   * Procesa notificaciones IPN de Mercado Pago.
-   * Consulta el estado real del pago en la API de MP y retorna el estado.
-   * Referencia: https://www.mercadopago.com.co/developers/es/docs/your-integrations/notifications/ipn
-   */
   async processMpWebhook(dto: MpWebhookDto): Promise<{ paymentId: string; status: string }> {
     if (dto.type !== 'payment') {
       return { paymentId: dto.data.id, status: 'ignored' };
@@ -167,14 +143,13 @@ export class PaymentsService {
     const payment = await response.json() as { status: string; external_reference: string };
     this.logger.log(`MP payment ${dto.data.id}: ${payment.status} (ref: ${payment.external_reference})`);
 
+    if (payment.status === 'approved' || payment.status === 'authorized') {
+      await this.ordersService.markAsPaid(payment.external_reference);
+    }
+
     return { paymentId: dto.data.id, status: payment.status };
   }
 
-  // ────────────────────────────────────────────────────────────────────────────
-  // Helpers
-  // ────────────────────────────────────────────────────────────────────────────
-
-  /** Accede a una propiedad de un objeto usando notación de punto (e.g. 'data.transaction.id') */
   private dotNotationGet(obj: any, path: string): any {
     return path.split('.').reduce((acc, key) => acc?.[key], obj) ?? '';
   }

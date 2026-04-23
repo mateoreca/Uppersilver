@@ -20,4 +20,9 @@ export class ProductsController {
   findOne(@Param('id') id: string) {
     return this.productsService.findOne(id);
   }
+
+  @Post(':id/reduce')
+  reduceStock(@Param('id') id: string, @Body('quantity') quantity: number) {
+    return this.productsService.reduceStock(id, quantity);
+  }
 }

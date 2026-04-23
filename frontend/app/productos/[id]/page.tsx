@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation';
 import { Product, SIZES, COLORS, CartItem } from '@/types';
 import { getProductById, formatPrice } from '@/lib/api';
 import { useCart } from '@/context/CartContext';
+import { useRealtime } from '@/context/RealtimeContext';
 
 interface ProductPageProps {
   params: Promise<{ id: string }>;
@@ -25,6 +26,7 @@ export default function ProductPage({ params }: ProductPageProps) {
   const [added, setAdded] = useState(false);
 
   const { addItem } = useCart();
+  const { socket } = useRealtime();
 
   useEffect(() => {
     getProductById(id)
@@ -32,6 +34,25 @@ export default function ProductPage({ params }: ProductPageProps) {
       .catch(() => setNotFoundError(true))
       .finally(() => setLoading(false));
   }, [id]);
+
+  // Suscripción a cambios en tiempo real
+  useEffect(() => {
+    if (!socket || !id) return;
+
+    const handleStockUpdate = (data: { productId: string; newStock: number }) => {
+      if (data.productId === id) {
+        console.log(`Stock updated in real-time for product ${id}: ${data.newStock}`);
+        setProduct((prev) => prev ? { ...prev, stock: data.newStock } : null);
+      }
+    };
+
+    socket.on('stock_updated', handleStockUpdate);
+    socket.emit('subscribe_to_product', id);
+
+    return () => {
+      socket.off('stock_updated', handleStockUpdate);
+    };
+  }, [socket, id]);
 
   if (notFoundError) notFound();
 

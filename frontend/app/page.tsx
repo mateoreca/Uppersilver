@@ -11,13 +11,17 @@ export default async function HomePage() {
     // Si el backend no está disponible, se muestran productos vacíos
   }
 
-  // Separar por género de forma simple basada en categorías
+  // Separar por género de forma precisa basada en el campo 'gender' o categorías como fallback
   const womenCats = WOMEN_CATEGORIES.map((c) => c.toLowerCase());
   const menProducts = products.filter((p) => {
+    if (p.gender === 'hombre') return true;
+    if (p.gender === 'mujer') return false;
     const cat = (p.category ?? '').toLowerCase();
     return !womenCats.some((wc) => cat.includes(wc.toLowerCase()));
   });
   const womenProducts = products.filter((p) => {
+    if (p.gender === 'mujer') return true;
+    if (p.gender === 'hombre') return false;
     const cat = (p.category ?? '').toLowerCase();
     return womenCats.some((wc) => cat.includes(wc.toLowerCase()));
   });

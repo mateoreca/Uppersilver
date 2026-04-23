@@ -12,6 +12,7 @@ import { AiModule } from './modules/ai/ai.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { ShippingModule } from './modules/shipping/shipping.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { OrdersModule } from './modules/orders/orders.module';
 
 @Module({
   imports: [
@@ -32,13 +33,25 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
           stream = clientOpts.stream;
         }
 
-        // OPCIÓN A: Base de datos en memoria (SQLite) para lograr el despliegue sin credenciales
+        if (isCloudRun) {
+          return {
+            type: 'postgres',
+            host: process.env.DB_HOST || 'localhost',
+            port: parseInt(process.env.DB_PORT || '5432', 10),
+            username: process.env.DB_USERNAME || 'postgres',
+            password: process.env.DB_PASSWORD,
+            database: process.env.DB_DATABASE || 'uppersilver',
+            autoLoadEntities: true,
+            synchronize: true, // ¡CUIDADO! Cambiar a false en producción real con migraciones
+            extra: { stream },
+          };
+        }
+
         return {
           type: 'sqlite',
           database: ':memory:',
           autoLoadEntities: true,
           synchronize: true,
-          extra: isCloudRun ? { stream } : undefined,
         };
       },
     }),
@@ -50,6 +63,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     PaymentsModule,
     ShippingModule,
     NotificationsModule,
+    OrdersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

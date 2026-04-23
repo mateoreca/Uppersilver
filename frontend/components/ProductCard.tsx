@@ -1,14 +1,39 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Product } from '@/types';
 import { formatPrice } from '@/lib/api';
+import { useRealtime } from '@/context/RealtimeContext';
 
 interface ProductCardProps {
   product: Product;
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product: initialProduct }: ProductCardProps) {
+  const [product, setProduct] = useState(initialProduct);
+  const { socket } = useRealtime();
+
+  useEffect(() => {
+    setProduct(initialProduct);
+  }, [initialProduct]);
+
+  useEffect(() => {
+    if (!socket || !product.id) return;
+
+    const handleStockUpdate = (data: { productId: string; newStock: number }) => {
+      if (data.productId === product.id) {
+        setProduct((prev) => ({ ...prev, stock: data.newStock }));
+      }
+    };
+
+    socket.on('stock_updated', handleStockUpdate);
+
+    return () => {
+      socket.off('stock_updated', handleStockUpdate);
+    };
+  }, [socket, product.id]);
+
   return (
     <Link
       href={`/productos/${product.id}`}
@@ -78,7 +103,28 @@ export default function ProductCard({ product }: ProductCardProps) {
           )}
 
           {/* Badge de stock bajo */}
-          {product.stock > 0 && product.stock <= 5 && (
+          {product.stock === 1 && (
+            <div
+              style={{
+                position: 'absolute',
+                top: '12px',
+                left: '12px',
+                padding: '4px 10px',
+                background: 'rgba(212,175,122,0.15)',
+                border: '1px solid rgba(212,175,122,0.4)',
+                borderRadius: '100px',
+                fontSize: '11px',
+                fontWeight: 600,
+                color: 'var(--accent-gold)',
+                letterSpacing: '0.06em',
+                backdropFilter: 'blur(8px)',
+              }}
+            >
+              ÚLTIMO EN STOCK
+            </div>
+          )}
+
+          {product.stock > 1 && product.stock <= 5 && (
             <div
               style={{
                 position: 'absolute',
@@ -100,7 +146,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           )}
 
           {/* Badge agotado */}
-          {product.stock === 0 && (
+          {product.stock <= 0 && (
             <div
               style={{
                 position: 'absolute',
@@ -109,6 +155,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                zIndex: 2
               }}
             >
               <span

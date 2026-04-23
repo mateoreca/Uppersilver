@@ -83,6 +83,14 @@ export default function CheckoutModal({ isOpen, onClose, totalAmount, onSuccess 
     try {
       const id = await saveOrderToFirestore();
       setOrderId(id);
+
+      // REDUCIR STOCK EN EL BACKEND REAL-TIME
+      // Recorremos los items del carrito y avisamos al backend de la reducción
+      const { reduceStock } = await import('@/lib/api');
+      for (const item of items) {
+        await reduceStock(item.productId, item.quantity);
+      }
+
       setLoading(false);
       setStep(3);
       onSuccess();
