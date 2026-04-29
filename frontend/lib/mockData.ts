@@ -31,7 +31,7 @@ import { Product } from '@/types';
  * - mock-m1.jpg (Vestido Midi Satén)
  * - mock-m2.jpg (Vestido Wrap Floral)
  * - mock-m3.jpg (Blusa Francesa Bordada)
- * - mock-m4.jpg (Top Seda Natural)
+ * - mock-m4.jpg (Top Seda Natural)d
  * - mock-m5.jpg (Pantalón Wide Leg)
  * - mock-m6.jpg (Chaqueta Tweed Premium)
  * - mock-m7.jpg (Blazer Oversize Cream)

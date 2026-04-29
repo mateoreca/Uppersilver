@@ -6,7 +6,7 @@ import { formatPrice } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, getDocs, writeBatch, increment } from 'firebase/firestore';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -78,17 +78,42 @@ export default function CheckoutModal({ isOpen, onClose, totalAmount, onSuccess 
     return docRef.id;
   };
 
+  /** Reduce el stock de un producto en Firestore directamente, buscando por nombre */
+  const reduceStockInFirestore = async (productName: string, quantity: number) => {
+    try {
+      const q = query(collection(db, 'products'), where('name', '==', productName));
+      const snapshot = await getDocs(q);
+      if (snapshot.empty) return;
+      const batch = writeBatch(db);
+      snapshot.docs.forEach((doc) => {
+        batch.update(doc.ref, { stock: increment(-quantity) });
+      });
+      await batch.commit();
+    } catch (err) {
+      console.warn(`No se pudo reducir stock en Firestore para "${productName}":`, err);
+    }
+  };
+
   const processMockPayment = async () => {
     setLoading(true);
     try {
       const id = await saveOrderToFirestore();
       setOrderId(id);
 
-      // REDUCIR STOCK EN EL BACKEND REAL-TIME
-      // Recorremos los items del carrito y avisamos al backend de la reducción
-      const { reduceStock } = await import('@/lib/api');
+      // 1. Reducir stock directo en Firestore (funciona siempre, con cualquier productId)
       for (const item of items) {
-        await reduceStock(item.productId, item.quantity);
+        await reduceStockInFirestore(item.name, item.quantity);
+      }
+
+      // 2. Intentar también reducir en el backend (sincroniza Postgres; falla silenciosamente si no está disponible)
+      try {
+        const { reduceStock } = await import('@/lib/api');
+        for (const item of items) {
+          await reduceStock(item.productId, item.quantity);
+        }
+      } catch {
+        // Backend no disponible: el stock ya fue reducido en Firestore
+        console.warn('Backend no disponible para reducción de stock, Firestore ya actualizado.');
       }
 
       setLoading(false);
@@ -96,7 +121,7 @@ export default function CheckoutModal({ isOpen, onClose, totalAmount, onSuccess 
       onSuccess();
       clearCart();
     } catch (err) {
-      console.error('Error guardando pedido:', err);
+      console.error('Error procesando pedido:', err);
       setLoading(false);
     }
   };

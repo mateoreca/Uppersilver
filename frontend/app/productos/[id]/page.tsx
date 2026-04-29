@@ -30,7 +30,22 @@ export default function ProductPage({ params }: ProductPageProps) {
 
   useEffect(() => {
     getProductById(id)
-      .then(setProduct)
+      .then(async (prod) => {
+        // Consultar el stock real en Firestore usando el nombre
+        try {
+          const { db } = await import('@/lib/firebase');
+          const { collection, query, where, getDocs } = await import('firebase/firestore');
+          const q = query(collection(db, 'products'), where('name', '==', prod.name));
+          const snapshot = await getDocs(q);
+          if (!snapshot.empty) {
+            prod.stock = snapshot.docs[0].data().stock;
+          }
+        } catch (err) {
+          console.error("Error obteniendo stock real de Firestore:", err);
+        }
+        setProduct(prod);
+        if (prod.stock === 0) setQuantity(0);
+      })
       .catch(() => setNotFoundError(true))
       .finally(() => setLoading(false));
   }, [id]);
@@ -42,7 +57,11 @@ export default function ProductPage({ params }: ProductPageProps) {
     const handleStockUpdate = (data: { productId: string; newStock: number }) => {
       if (data.productId === id) {
         console.log(`Stock updated in real-time for product ${id}: ${data.newStock}`);
-        setProduct((prev) => prev ? { ...prev, stock: data.newStock } : null);
+        setProduct((prev) => {
+            if (!prev) return null;
+            if (data.newStock === 0) setQuantity(0);
+            return { ...prev, stock: data.newStock };
+        });
       }
     };
 
@@ -56,7 +75,7 @@ export default function ProductPage({ params }: ProductPageProps) {
 
   if (notFoundError) notFound();
 
-  const canAddToCart = selectedSize !== '' && selectedColor !== '' && !loading && product && product.stock > 0;
+  const canAddToCart = selectedSize !== '' && selectedColor !== '' && !loading && product && product.stock > 0 && quantity > 0;
 
   const handleAddToCart = () => {
     if (!product || !canAddToCart) return;
@@ -318,15 +337,15 @@ export default function ProductPage({ params }: ProductPageProps) {
                 <button
                   id="quantity-decrement"
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  disabled={quantity <= 1}
+                  disabled={quantity <= 1 || product.stock === 0}
                   style={{
                     width: '48px',
                     height: '48px',
                     background: 'transparent',
                     border: 'none',
-                    color: quantity <= 1 ? 'var(--text-muted)' : 'var(--text-primary)',
+                    color: (quantity <= 1 || product.stock === 0) ? 'var(--text-muted)' : 'var(--text-primary)',
                     fontSize: '20px',
-                    cursor: quantity <= 1 ? 'not-allowed' : 'pointer',
+                    cursor: (quantity <= 1 || product.stock === 0) ? 'not-allowed' : 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -345,7 +364,7 @@ export default function ProductPage({ params }: ProductPageProps) {
                     justifyContent: 'center',
                     fontSize: '16px',
                     fontWeight: 600,
-                    color: 'var(--text-primary)',
+                    color: product.stock === 0 ? 'var(--text-muted)' : 'var(--text-primary)',
                     borderLeft: '1px solid var(--border-subtle)',
                     borderRight: '1px solid var(--border-subtle)',
                   }}
@@ -354,16 +373,16 @@ export default function ProductPage({ params }: ProductPageProps) {
                 </span>
                 <button
                   id="quantity-increment"
-                  onClick={() => setQuantity((q) => Math.min(product.stock || 99, q + 1))}
-                  disabled={quantity >= (product.stock || 99)}
+                  onClick={() => setQuantity((q) => Math.min(product.stock ?? 99, q + 1))}
+                  disabled={quantity >= (product.stock ?? 99) || product.stock === 0}
                   style={{
                     width: '48px',
                     height: '48px',
                     background: 'transparent',
                     border: 'none',
-                    color: quantity >= (product.stock || 99) ? 'var(--text-muted)' : 'var(--text-primary)',
+                    color: (quantity >= (product.stock ?? 99) || product.stock === 0) ? 'var(--text-muted)' : 'var(--text-primary)',
                     fontSize: '20px',
-                    cursor: quantity >= (product.stock || 99) ? 'not-allowed' : 'pointer',
+                    cursor: (quantity >= (product.stock ?? 99) || product.stock === 0) ? 'not-allowed' : 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
