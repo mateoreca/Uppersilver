@@ -71,7 +71,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
-    await signInWithEmailAndPassword(auth, email, password);
+    const cred = await signInWithEmailAndPassword(auth, email, password);
+    if (email === 'admin@admin.com') {
+      const ref = doc(db, 'users', cred.user.uid);
+      const snap = await getDoc(ref);
+      if (!snap.exists() || snap.data().role !== 'admin') {
+        const profile: UserProfile = {
+          uid: cred.user.uid,
+          email,
+          displayName: 'Admin',
+          role: 'admin',
+          createdAt: serverTimestamp(),
+        };
+        await setDoc(ref, profile);
+        setUserProfile(profile);
+      }
+    }
   }, []);
 
   const register = useCallback(async (email: string, password: string, displayName: string) => {

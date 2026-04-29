@@ -43,9 +43,10 @@ export default function AdminPage() {
   const { isAdmin, loading, user } = useAuth();
   const router = useRouter();
 
-  const [tab, setTab] = useState<'pedidos' | 'usuarios'>('pedidos');
+  const [tab, setTab] = useState<'pedidos' | 'usuarios' | 'productos'>('pedidos');
   const [orders, setOrders] = useState<Order[]>([]);
   const [users, setUsers] = useState<UserDoc[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
@@ -65,6 +66,9 @@ export default function AdminPage() {
         // Users
         const uSnap = await getDocs(collection(db, 'users'));
         setUsers(uSnap.docs.map(d => ({ ...d.data() } as UserDoc)));
+        // Products
+        const pSnap = await getDocs(collection(db, 'products'));
+        setProducts(pSnap.docs.map(d => ({ id: d.id, ...d.data() })));
       } catch (e) {
         console.error('Error fetching admin data:', e);
       } finally {
@@ -73,6 +77,19 @@ export default function AdminPage() {
     };
     fetchData();
   }, [isAdmin]);
+
+  const updateProductStock = async (productId: string, newStock: number) => {
+    if (newStock < 0) return;
+    setUpdatingId(productId);
+    try {
+      await updateDoc(doc(db, 'products', productId), { stock: newStock });
+      setProducts(prev => prev.map(p => p.id === productId ? { ...p, stock: newStock } : p));
+    } catch (e) {
+      console.error('Error updating stock:', e);
+    } finally {
+      setUpdatingId(null);
+    }
+  };
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     setUpdatingId(orderId);
@@ -127,9 +144,9 @@ export default function AdminPage() {
 
         {/* Tabs */}
         <div style={{ display: 'flex', gap: '4px', background: 'var(--bg-elevated)', borderRadius: '10px', padding: '4px', width: 'fit-content', marginBottom: '28px' }}>
-          {(['pedidos', 'usuarios'] as const).map((t) => (
+          {(['pedidos', 'productos', 'usuarios'] as const).map((t) => (
             <button key={t} onClick={() => setTab(t)} style={{ padding: '10px 24px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: '14px', background: tab === t ? '#fff' : 'transparent', color: tab === t ? 'var(--text-primary)' : 'var(--text-muted)', boxShadow: tab === t ? 'var(--shadow-card)' : 'none', transition: 'all 0.2s', textTransform: 'capitalize' }}>
-              {t === 'pedidos' ? `📦 Pedidos (${orders.length})` : `👤 Usuarios (${users.length})`}
+              {t === 'pedidos' ? `📦 Pedidos (${orders.length})` : t === 'productos' ? `🛍️ Productos (${products.length})` : `👤 Usuarios (${users.length})`}
             </button>
           ))}
         </div>
@@ -188,6 +205,55 @@ export default function AdminPage() {
                 </div>
               );
             })}
+          </div>
+        ) : tab === 'productos' ? (
+          // ── PRODUCTOS TAB ────────────────────────────────────────────────────
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {products.length === 0 && <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '40px' }}>No hay productos en la base de datos.</p>}
+            {products.map((product) => (
+              <div key={product.id} style={{ background: '#fff', borderRadius: '12px', padding: '18px 20px', border: '1px solid var(--border-card)', display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap', boxShadow: 'var(--shadow-card)' }}>
+                <div style={{ width: '60px', height: '60px', borderRadius: '8px', background: 'var(--bg-elevated)', overflow: 'hidden', border: '1px solid var(--border-subtle)', flexShrink: 0 }}>
+                  {product.imageUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={product.imageUrl} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>🛍️</div>
+                  )}
+                </div>
+                <div style={{ flex: 1, minWidth: '200px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                    <span style={{ fontWeight: 600, fontSize: '15px', color: 'var(--text-primary)' }}>{product.name}</span>
+                    {product.stock <= 5 && product.stock > 0 && <span style={{ fontSize: '10px', fontWeight: 700, color: '#d97706', background: 'rgba(245,158,11,0.1)', padding: '2px 6px', borderRadius: '4px' }}>POCO STOCK</span>}
+                    {product.stock === 0 && <span style={{ fontSize: '10px', fontWeight: 700, color: '#dc2626', background: 'rgba(220,38,38,0.1)', padding: '2px 6px', borderRadius: '4px' }}>AGOTADO</span>}
+                  </div>
+                  <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>ID: {product.id} · Categoría: {product.category || 'N/A'}</p>
+                  <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '2px' }}>Precio: {formatPrice(Number(product.price))}</p>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ textAlign: 'right', marginRight: '16px' }}>
+                    <div style={{ fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Stock Actual</div>
+                    <div style={{ fontSize: '24px', fontWeight: 700, color: product.stock === 0 ? '#dc2626' : 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>{product.stock}</div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-elevated)', borderRadius: '8px', border: '1px solid var(--border-subtle)', overflow: 'hidden' }}>
+                    <button
+                      onClick={() => updateProductStock(product.id, Math.max(0, product.stock - 1))}
+                      disabled={updatingId === product.id || product.stock <= 0}
+                      style={{ padding: '10px 16px', background: 'transparent', border: 'none', cursor: (updatingId === product.id || product.stock <= 0) ? 'not-allowed' : 'pointer', fontSize: '18px', color: (updatingId === product.id || product.stock <= 0) ? 'var(--text-muted)' : 'var(--text-primary)', transition: 'background 0.2s' }}
+                    >
+                      −
+                    </button>
+                    <div style={{ width: '1px', height: '24px', background: 'var(--border-subtle)' }} />
+                    <button
+                      onClick={() => updateProductStock(product.id, product.stock + 1)}
+                      disabled={updatingId === product.id}
+                      style={{ padding: '10px 16px', background: 'transparent', border: 'none', cursor: updatingId === product.id ? 'not-allowed' : 'pointer', fontSize: '18px', color: updatingId === product.id ? 'var(--text-muted)' : 'var(--text-primary)', transition: 'background 0.2s' }}
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
           // ── USUARIOS TAB ─────────────────────────────────────────────────────
