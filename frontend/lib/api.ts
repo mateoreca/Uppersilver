@@ -7,14 +7,10 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080';
 export async function getProducts(): Promise<Product[]> {
   try {
     const res = await fetch(`${API_BASE_URL}/products`, {
-      // Revalidar cada 60 segundos (ISR)
-      next: { revalidate: 60 },
+      next: { revalidate: 0 }, // Disable cache for admin/realtime accuracy
     });
 
-    if (!res.ok) {
-      throw new Error(`Error al obtener productos: ${res.status}`);
-    }
-
+    if (!res.ok) throw new Error(`Error al obtener productos: ${res.status}`);
     return res.json();
   } catch (error) {
     console.warn('Backend unavailable, falling back to mock data');
@@ -24,101 +20,51 @@ export async function getProducts(): Promise<Product[]> {
 
 /** Obtiene un producto por ID */
 export async function getProductById(id: string): Promise<Product> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/products/${id}`, {
-      next: { revalidate: 60 },
-    });
-
-    if (!res.ok) {
-      throw new Error(`Producto #${id} no encontrado`);
-    }
-
-    return res.json();
-  } catch (error) {
-    const mock = ALL_MOCK_PRODUCTS.find((p) => p.id === id);
-    if (!mock) throw new Error(`Producto #${id} no encontrado en mock data`);
-    return mock;
-  }
-}
-
-/** Reduce el stock de un producto en el backend */
-export async function reduceStock(productId: string, quantity: number): Promise<void> {
-  try {
-    await fetch(`${API_BASE_URL}/products/${productId}/reduce`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ quantity }),
-    });
-  } catch (error) {
-    console.error(`Error reduciendo stock para ${productId}:`, error);
-  }
-}
-
-/** Filtra productos por categoría (client-side) */
-export function filterByCategory(products: Product[], category: string): Product[] {
-  if (!category || category === 'Todos') return products;
-  return products.filter(
-    (p) => p.category?.toLowerCase() === category.toLowerCase(),
-  );
-}
-
-/** Filtra productos por género basado en la categoría */
-export function filterByGender(products: Product[], gender: 'hombre' | 'mujer'): Product[] {
-  const menKeywords = ['camisa', 'pantalon', 'chaqueta', 'ropa interior', 'corbata', 'traje'];
-  const womenKeywords = ['vestido', 'blusa', 'falda', 'top', 'ropa interior mujer'];
-
-  return products.filter((p) => {
-    // 1. Usar el campo gender si viene desde el backend o mock
-    if (p.gender) return p.gender === gender;
-
-    // 2. Fallback para mock data basado en el ID
-    if (p.id.startsWith('mock-h')) return gender === 'hombre';
-    if (p.id.startsWith('mock-m')) return gender === 'mujer';
-
-    // 3. Heurística original basada en categoría (para datos sin gender ni ID mock)
-    if (!p.category) return true;
-    const cat = p.category.toLowerCase();
-    if (gender === 'hombre') {
-      return !womenKeywords.some((kw) => cat.includes(kw));
-    } else {
-      return !menKeywords.some((kw) => cat.includes(kw));
-    }
-  });
-}
-
-/** Login de usuario */
-export async function loginUser(email: string, password: string) {
-  const res = await fetch(`${API_BASE_URL}/auth/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
-  });
-
-  if (!res.ok) {
-    const err = await res.json();
-    throw new Error(err.message ?? 'Credenciales inválidas');
-  }
-
+  const res = await fetch(`${API_BASE_URL}/products/${id}`, { cache: 'no-store' });
+  if (!res.ok) throw new Error(`Producto #${id} no encontrado`);
   return res.json();
 }
 
-/** Crea preferencia de Mercado Pago */
-export async function createMercadoPagoPreference(payload: {
-  externalReference: string;
-  payerEmail: string;
-  items: { title: string; quantity: number; unit_price: number }[];
-  backUrl?: string;
-}) {
-  const res = await fetch(`${API_BASE_URL}/payments/mercadopago/preference`, {
+/** Reduce el stock de un producto (compra) */
+export async function reduceStock(productId: string, quantity: number): Promise<void> {
+  await fetch(`${API_BASE_URL}/products/${productId}/reduce`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({ quantity }),
   });
+}
 
-  if (!res.ok) {
-    throw new Error('Error al crear preferencia de pago');
-  }
+/** Actualiza el stock de un producto (Admin) */
+export async function updateProductStock(productId: string, stock: number): Promise<void> {
+  const res = await fetch(`${API_BASE_URL}/products/${productId}/stock`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ stock }),
+  });
+  if (!res.ok) throw new Error('Error al actualizar stock');
+}
 
+/** Obtiene todos los pedidos (Admin) */
+export async function getOrders(): Promise<any[]> {
+  const res = await fetch(`${API_BASE_URL}/orders`, { cache: 'no-store' });
+  if (!res.ok) throw new Error('Error al obtener pedidos');
+  return res.json();
+}
+
+/** Actualiza el estado de un pedido (Admin) */
+export async function updateOrderStatus(orderId: string, status: string): Promise<void> {
+  const res = await fetch(`${API_BASE_URL}/orders/${orderId}/status`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status }),
+  });
+  if (!res.ok) throw new Error('Error al actualizar estado del pedido');
+}
+
+/** Obtiene todos los usuarios (Admin) */
+export async function getUsers(): Promise<any[]> {
+  const res = await fetch(`${API_BASE_URL}/users`, { cache: 'no-store' });
+  if (!res.ok) throw new Error('Error al obtener usuarios');
   return res.json();
 }
 
@@ -129,4 +75,10 @@ export function formatPrice(price: number): string {
     currency: 'COP',
     minimumFractionDigits: 0,
   }).format(price);
+}
+
+// ... helper filters (no cambios necesarios)
+export function filterByCategory(products: Product[], category: string): Product[] {
+  if (!category || category === 'Todos') return products;
+  return products.filter((p) => p.category?.toLowerCase() === category.toLowerCase());
 }

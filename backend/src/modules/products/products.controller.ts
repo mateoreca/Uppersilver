@@ -25,4 +25,9 @@ export class ProductsController {
   reduceStock(@Param('id') id: string, @Body('quantity') quantity: number) {
     return this.productsService.reduceStock(id, quantity);
   }
+
+  @Post(':id/stock')
+  updateStock(@Param('id') id: string, @Body('stock') stock: number) {
+    return this.productsService.updateStock(id, stock);
+  }
 }

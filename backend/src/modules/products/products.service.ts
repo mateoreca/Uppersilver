@@ -71,37 +71,19 @@ export class ProductsService implements OnModuleInit {
     const updatedProduct = await this.productRepository.save(product);
     this.logger.log(`SUCCESS: Postgres stock for '${product.name}' is now ${updatedProduct.stock}`);
     
-    // 1. Emitir evento en tiempo real vía WebSockets
+    // Emitir evento en tiempo real vía WebSockets
     this.realtimeGateway.notifyStockUpdate(product.id, updatedProduct.stock);
     
-    // 2. Sincronizar con FIRESTORE
-    try {
-      this.logger.log(`SYNC: Attempting to update Firestore for product '${product.name}'...`);
-      
-      // Buscamos exacto pero también por variaciones si acaso
-      const snapshot = await this.firestore.collection('products')
-        .where('name', '==', product.name)
-        .get();
-      
-      if (!snapshot.empty) {
-        const doc = snapshot.docs[0];
-        await doc.ref.update({ stock: updatedProduct.stock, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
-        this.logger.log(`FIREBASE SYNC SUCCESS: Updated product '${product.name}' to ${updatedProduct.stock} in Firestore`);
-      } else {
-        this.logger.warn(`FIREBASE SYNC WARNING: Document with name '${product.name}' not found in Firestore products collection.`);
-        
-        // Intento 2: Búsqueda ignorando mayúsculas/minúsculas si fuera necesario (simulado con listado si es pequeño)
-        const allProducts = await this.firestore.collection('products').get();
-        const fallbackDoc = allProducts.docs.find(d => d.data().name.toLowerCase().trim() === product.name.toLowerCase().trim());
-        
-        if (fallbackDoc) {
-          await fallbackDoc.ref.update({ stock: updatedProduct.stock });
-          this.logger.log(`FIREBASE SYNC SUCCESS (Fallback): Updated via case-insensitive match for '${product.name}'`);
-        }
-      }
-    } catch (e) {
-      this.logger.error(`FIREBASE SYNC ERROR: Failed to update Firestore: ${e.message}`);
-    }
+    return updatedProduct;
+  }
+
+  async updateStock(id: string, newStock: number): Promise<Product> {
+    const product = await this.findOne(id);
+    product.stock = newStock;
+    const updatedProduct = await this.productRepository.save(product);
+    
+    // Emitir evento en tiempo real vía WebSockets
+    this.realtimeGateway.notifyStockUpdate(product.id, updatedProduct.stock);
     
     return updatedProduct;
   }

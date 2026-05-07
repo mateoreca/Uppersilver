@@ -30,19 +30,7 @@ export default function ProductPage({ params }: ProductPageProps) {
 
   useEffect(() => {
     getProductById(id)
-      .then(async (prod) => {
-        // Consultar el stock real en Firestore usando el nombre
-        try {
-          const { db } = await import('@/lib/firebase');
-          const { collection, query, where, getDocs } = await import('firebase/firestore');
-          const q = query(collection(db, 'products'), where('name', '==', prod.name));
-          const snapshot = await getDocs(q);
-          if (!snapshot.empty) {
-            prod.stock = snapshot.docs[0].data().stock;
-          }
-        } catch (err) {
-          console.error("Error obteniendo stock real de Firestore:", err);
-        }
+      .then((prod) => {
         setProduct(prod);
         if (prod.stock === 0) setQuantity(0);
       })

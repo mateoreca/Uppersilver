@@ -36,4 +36,18 @@ export class OrdersService {
 
     return order;
   }
+
+  async findAll(): Promise<Order[]> {
+    return this.orderRepository.find({
+      order: { createdAt: 'DESC' },
+      relations: ['product']
+    });
+  }
+
+  async updateStatus(id: string, status: string): Promise<Order> {
+    const order = await this.orderRepository.findOne({ where: { id } });
+    if (!order) throw new NotFoundException('Order not found');
+    order.status = status;
+    return this.orderRepository.save(order);
+  }
 }
