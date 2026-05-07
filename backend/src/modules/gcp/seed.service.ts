@@ -13,7 +13,8 @@ export class SeedService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    this.logger.log('Starting product reorganization (Seed)...');
+    this.logger.log('Skipping product reorganization (Seed) to preserve production data (orders, users, stock)...');
+    return; // Se desactiva la semilla automática para no borrar datos reales.
 
     // Limpiamos los productos existentes con SQL puro y CASCADE para evitar errores de FK
     await this.productRepo.query('DELETE FROM products CASCADE');
