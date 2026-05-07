@@ -8,7 +8,7 @@ import { useAuth } from '@/context/AuthContext';
 export default function RegistroPage() {
   const { register } = useAuth();
   const router = useRouter();
-  const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '' });
+  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', password: '', confirm: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -25,7 +25,7 @@ export default function RegistroPage() {
     }
     setLoading(true);
     try {
-      await register(form.email, form.password, form.name);
+      await register(form.email, form.password, form.firstName, form.lastName);
       router.push('/');
     } catch (err: unknown) {
       const msg = (err as { code?: string })?.code;
@@ -58,8 +58,17 @@ export default function RegistroPage() {
 
         <div className="glass-card" style={{ padding: '36px', borderRadius: '16px' }}>
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: 500 }}>Nombre</label>
+                <input id="reg-firstname" type="text" required value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} placeholder="Daniel" style={{ width: '100%', padding: '14px 16px', borderRadius: '10px', border: '1px solid var(--border-subtle)', background: 'var(--bg-surface)', color: 'var(--text-primary)', outline: 'none', fontSize: '15px' }} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: 500 }}>Apellido</label>
+                <input id="reg-lastname" type="text" required value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} placeholder="Gómez" style={{ width: '100%', padding: '14px 16px', borderRadius: '10px', border: '1px solid var(--border-subtle)', background: 'var(--bg-surface)', color: 'var(--text-primary)', outline: 'none', fontSize: '15px' }} />
+              </div>
+            </div>
             {[
-              { id: 'reg-name', label: 'Nombre completo', type: 'text', key: 'name', placeholder: 'Daniel Gómez' },
               { id: 'reg-email', label: 'Correo electrónico', type: 'email', key: 'email', placeholder: 'tu@correo.com' },
               { id: 'reg-password', label: 'Contraseña', type: 'password', key: 'password', placeholder: 'Mínimo 6 caracteres' },
               { id: 'reg-confirm', label: 'Confirmar contraseña', type: 'password', key: 'confirm', placeholder: 'Repite tu contraseña' },

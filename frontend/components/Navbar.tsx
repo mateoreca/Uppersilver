@@ -17,7 +17,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { totalItems } = useCart();
-  const { user, userProfile, isAdmin, logout, loading } = useAuth();
+  const { user, isAdmin, logout, loading } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleLogout = async () => {
@@ -77,7 +77,7 @@ export default function Navbar() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }} className="desktop-nav">
                   <Link href="/mis-pedidos" style={{ textDecoration: 'none' }}>
                     <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 500, padding: '6px 12px', borderRadius: '8px', border: '1px solid var(--border-subtle)', background: 'var(--bg-elevated)', display: 'inline-block', cursor: 'pointer' }}>
-                      {userProfile?.displayName?.split(' ')[0] || 'Mi cuenta'}
+                      {user?.firstName || 'Mi cuenta'}
                     </span>
                   </Link>
                   <button id="navbar-logout" onClick={handleLogout} className="btn-icon" title="Cerrar sesión" style={{ width: '36px', height: '36px' }}>
