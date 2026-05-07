@@ -19,6 +19,7 @@ interface AuthContextValue {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, firstName: string, lastName: string) => Promise<void>;
   logout: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -84,10 +85,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   }, []);
 
+  const resetPassword = useCallback(async (email: string) => {
+    // Implementación simulada para evitar el error de compilación.
+    // Futuro: Llamar a `${API_URL}/auth/reset-password`
+    console.log(`Solicitud de reseteo de contraseña para: ${email}`);
+    return Promise.resolve();
+  }, []);
+
   const isAdmin = user?.role === 'admin';
 
   return (
-    <AuthContext.Provider value={{ user, loading, isAdmin, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, isAdmin, login, register, logout, resetPassword }}>
       {children}
     </AuthContext.Provider>
   );
