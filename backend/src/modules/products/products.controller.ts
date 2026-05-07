@@ -1,6 +1,13 @@
 import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
+import { IsNumber, IsNotEmpty } from 'class-validator';
+
+class UpdateStockDto {
+  @IsNumber()
+  @IsNotEmpty()
+  stock: number;
+}
 
 @Controller('products')
 export class ProductsController {
@@ -27,7 +34,7 @@ export class ProductsController {
   }
 
   @Post(':id/stock')
-  updateStock(@Param('id') id: string, @Body('stock') stock: number) {
-    return this.productsService.updateStock(id, stock);
+  updateStock(@Param('id') id: string, @Body() body: UpdateStockDto) {
+    return this.productsService.updateStock(id, body.stock);
   }
 }

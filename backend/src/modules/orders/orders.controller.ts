@@ -1,5 +1,12 @@
 import { Controller, Get, Post, Body, Param, Patch } from '@nestjs/common';
 import { OrdersService } from './orders.service';
+import { IsString, IsNotEmpty } from 'class-validator';
+
+class UpdateStatusDto {
+  @IsString()
+  @IsNotEmpty()
+  status: string;
+}
 
 @Controller('orders')
 export class OrdersController {
@@ -21,7 +28,7 @@ export class OrdersController {
   }
 
   @Patch(':id/status')
-  updateStatus(@Param('id') id: string, @Body('status') status: string) {
-    return this.ordersService.updateStatus(id, status);
+  updateStatus(@Param('id') id: string, @Body() body: UpdateStatusDto) {
+    return this.ordersService.updateStatus(id, body.status);
   }
 }
