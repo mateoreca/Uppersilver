@@ -22,18 +22,15 @@ import { OrdersModule } from './modules/orders/orders.module';
     TypeOrmModule.forRootAsync({
       useFactory: async () => {
         const isCloudRun = !!process.env.INSTANCE_CONNECTION_NAME;
-        let stream;
+        const databaseUrl = process.env.DATABASE_URL;
 
+        // 1) GCP Cloud Run con Cloud SQL Connector
         if (isCloudRun && process.env.INSTANCE_CONNECTION_NAME) {
           const connector = new Connector();
           const clientOpts = await connector.getOptions({
             instanceConnectionName: process.env.INSTANCE_CONNECTION_NAME,
             ipType: IpAddressTypes.PUBLIC,
           });
-          stream = clientOpts.stream;
-        }
-
-        if (isCloudRun) {
           return {
             type: 'postgres',
             host: process.env.DB_HOST || 'localhost',
@@ -42,11 +39,23 @@ import { OrdersModule } from './modules/orders/orders.module';
             password: process.env.DB_PASSWORD,
             database: process.env.DB_DATABASE || 'uppersilver',
             autoLoadEntities: true,
-            synchronize: true, // ¡CUIDADO! Cambiar a false en producción real con migraciones
-            extra: { stream },
+            synchronize: true,
+            extra: { stream: clientOpts.stream },
           };
         }
 
+        // 2) Railway / Render / Neon — PostgreSQL via DATABASE_URL
+        if (databaseUrl) {
+          return {
+            type: 'postgres',
+            url: databaseUrl,
+            autoLoadEntities: true,
+            synchronize: true,
+            ssl: databaseUrl.includes('sslmode=require') ? { rejectUnauthorized: false } : false,
+          };
+        }
+
+        // 3) Desarrollo local — SQLite en memoria
         return {
           type: 'sqlite',
           database: ':memory:',
