@@ -14,7 +14,18 @@ export class OrdersService {
 
   async create(data: Partial<Order>): Promise<Order> {
     const order = this.orderRepository.create(data);
-    return this.orderRepository.save(order);
+    const savedOrder = await this.orderRepository.save(order);
+    
+    // Restar stock automáticamente si el pago ya viene confirmado (simulación o pasarela)
+    if (savedOrder.status === 'Pago confirmado' || savedOrder.status === 'paid') {
+      try {
+        await this.productsService.reduceStock(savedOrder.productId, savedOrder.quantity);
+      } catch (err) {
+        console.error('Error reduciendo stock:', err);
+      }
+    }
+    
+    return savedOrder;
   }
 
   async findByReference(reference: string): Promise<Order> {
