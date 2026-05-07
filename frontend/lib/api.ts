@@ -93,3 +93,22 @@ export function filterByCategory(products: Product[], category: string): Product
   if (!category || category === 'Todos') return products;
   return products.filter((p) => p.category?.toLowerCase() === category.toLowerCase());
 }
+
+/** Filtra productos por género basado en la categoría */
+export function filterByGender(products: Product[], gender: 'hombre' | 'mujer'): Product[] {
+  const menKeywords = ['camisa', 'pantalon', 'chaqueta', 'ropa interior', 'corbata', 'traje'];
+  const womenKeywords = ['vestido', 'blusa', 'falda', 'top', 'ropa interior mujer'];
+
+  return products.filter((p) => {
+    if (p.gender) return p.gender === gender;
+    if (p.id.startsWith('mock-h')) return gender === 'hombre';
+    if (p.id.startsWith('mock-m')) return gender === 'mujer';
+    if (!p.category) return true;
+    const cat = p.category.toLowerCase();
+    if (gender === 'hombre') {
+      return !womenKeywords.some((kw) => cat.includes(kw));
+    } else {
+      return !menKeywords.some((kw) => cat.includes(kw));
+    }
+  });
+}
