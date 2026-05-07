@@ -68,6 +68,17 @@ export async function getUsers(): Promise<any[]> {
   return res.json();
 }
 
+/** Crea un nuevo pedido */
+export async function createOrder(orderData: any): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/orders`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(orderData),
+  });
+  if (!res.ok) throw new Error('Error al crear el pedido');
+  return res.json();
+}
+
 /** Formato de precio en COP */
 export function formatPrice(price: number): string {
   return new Intl.NumberFormat('es-CO', {

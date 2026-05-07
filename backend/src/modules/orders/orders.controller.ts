@@ -10,6 +10,16 @@ export class OrdersController {
     return this.ordersService.findAll();
   }
 
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.ordersService.findOne(id);
+  }
+
+  @Post()
+  create(@Body() orderData: any) {
+    return this.ordersService.create(orderData);
+  }
+
   @Patch(':id/status')
   updateStatus(@Param('id') id: string, @Body('status') status: string) {
     return this.ordersService.updateStatus(id, status);
