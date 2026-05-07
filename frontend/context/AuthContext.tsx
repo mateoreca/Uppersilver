@@ -1,129 +1,97 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import {
-  User,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  sendPasswordResetEmail,
-  onAuthStateChanged,
-  updateProfile,
-} from 'firebase/auth';
-import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
-import { auth, db } from '@/lib/firebase';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export interface UserProfile {
-  uid: string;
+export interface User {
+  id: string;
   email: string;
-  displayName: string;
+  firstName: string;
+  lastName: string;
   role: 'user' | 'admin';
-  createdAt: unknown;
-  address?: string;
 }
 
 interface AuthContextValue {
   user: User | null;
-  userProfile: UserProfile | null;
   loading: boolean;
   isAdmin: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, displayName: string) => Promise<void>;
+  register: (email: string, password: string, firstName: string, lastName: string) => Promise<void>;
   logout: () => Promise<void>;
-  resetPassword: (email: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch profile from Firestore
-  const fetchProfile = async (uid: string): Promise<UserProfile | null> => {
-    try {
-      const ref = doc(db, 'users', uid);
-      const snap = await getDoc(ref);
-      if (snap.exists()) return snap.data() as UserProfile;
-    } catch (e) {
-      console.error('Error fetching profile:', e);
-    }
-    return null;
-  };
-
+  // Restore session from localStorage on mount
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
-      setUser(firebaseUser);
-      if (firebaseUser) {
-        const profile = await fetchProfile(firebaseUser.uid);
-        setUserProfile(profile);
-      } else {
-        setUserProfile(null);
-      }
-      setLoading(false);
-    });
-    return () => unsub();
+    const savedUser = localStorage.getItem('uppersilver_user');
+    const token = localStorage.getItem('uppersilver_token');
+    
+    if (savedUser && token) {
+      setUser(JSON.parse(savedUser));
+    }
+    setLoading(false);
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
-    const cred = await signInWithEmailAndPassword(auth, email, password);
-    if (email === 'admin@admin.com') {
-      const ref = doc(db, 'users', cred.user.uid);
-      const snap = await getDoc(ref);
-      if (!snap.exists() || snap.data().role !== 'admin') {
-        const profile: UserProfile = {
-          uid: cred.user.uid,
-          email,
-          displayName: 'Admin',
-          role: 'admin',
-          createdAt: serverTimestamp(),
-        };
-        await setDoc(ref, profile);
-        setUserProfile(profile);
-      }
+    const res = await fetch(`${API_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message || 'Error al iniciar sesión');
     }
+
+    const data = await res.json();
+    localStorage.setItem('uppersilver_token', data.access_token);
+    localStorage.setItem('uppersilver_user', JSON.stringify(data.user));
+    setUser(data.user);
   }, []);
 
-  const register = useCallback(async (email: string, password: string, displayName: string) => {
-    const cred = await createUserWithEmailAndPassword(auth, email, password);
-    await updateProfile(cred.user, { displayName });
+  const register = useCallback(async (email: string, password: string, firstName: string, lastName: string) => {
+    const res = await fetch(`${API_URL}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, firstName, lastName }),
+    });
 
-    // Create Firestore profile
-    const profile: UserProfile = {
-      uid: cred.user.uid,
-      email,
-      displayName,
-      role: 'user',
-      createdAt: serverTimestamp(),
-    };
-    await setDoc(doc(db, 'users', cred.user.uid), profile);
-    setUserProfile(profile);
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message || 'Error al crear la cuenta');
+    }
+
+    const data = await res.json();
+    localStorage.setItem('uppersilver_token', data.access_token);
+    localStorage.setItem('uppersilver_user', JSON.stringify(data.user));
+    setUser(data.user);
   }, []);
 
   const logout = useCallback(async () => {
-    await signOut(auth);
-    setUserProfile(null);
+    localStorage.removeItem('uppersilver_token');
+    localStorage.removeItem('uppersilver_user');
+    setUser(null);
   }, []);
 
-  const resetPassword = useCallback(async (email: string) => {
-    await sendPasswordResetEmail(auth, email);
-  }, []);
-
-  const isAdmin = userProfile?.role === 'admin';
+  const isAdmin = user?.role === 'admin';
 
   return (
-    <AuthContext.Provider value={{ user, userProfile, loading, isAdmin, login, register, logout, resetPassword }}>
+    <AuthContext.Provider value={{ user, loading, isAdmin, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
 }
-
-// ─── Hook ─────────────────────────────────────────────────────────────────────
 
 export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);
