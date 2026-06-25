@@ -1,6 +1,5 @@
 # UpperSilver — Plataforma e-commerce
 
-![NestJS](https://nestjs.com/img/logo-small.svg)  
 Lenguajes principales: TypeScript, Next.js (React)
 
 Qué es
